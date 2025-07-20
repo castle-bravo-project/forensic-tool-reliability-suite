@@ -2,7 +2,7 @@
 import React, { useState, Fragment } from 'react';
 import { HashRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
 import type { NavItem } from './types';
-import { HashIcon, FolderIcon, NetworkIcon, DeviceIcon, IntegrityIcon, ChevronDownIcon, LightbulbIcon, ScaleIcon } from './components';
+import { HashIcon, FolderIcon, NetworkIcon, DeviceIcon, IntegrityIcon, ChevronDownIcon, LightbulbIcon, ScaleIcon, ApiKeyBanner } from './components';
 
 import DashboardPage from './pages/DashboardPage';
 import StrategySimulatorPage from './pages/StrategySimulatorPage';
@@ -153,12 +153,21 @@ const Sidebar: React.FC = () => (
 
 
 const App: React.FC = () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleApiKeySet = () => {
+    // Force re-render of components that depend on API key status
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <HashRouter>
       <div className="flex h-screen bg-slate-100 font-sans">
         <Sidebar />
         <main className="flex-1 p-8 overflow-y-auto">
-          <Routes>
+          <ApiKeyBanner onKeySet={handleApiKeySet} />
+          <div key={refreshKey}>
+            <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/strategy-simulator" element={<StrategySimulatorPage />} />
@@ -174,7 +183,8 @@ const App: React.FC = () => {
             <Route path="/integrity/anti-forensics" element={<AntiForensicsDetectionPage />} />
             <Route path="/integrity/chain-of-custody" element={<ChainOfCustodyTrackingPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+            </Routes>
+          </div>
         </main>
       </div>
     </HashRouter>

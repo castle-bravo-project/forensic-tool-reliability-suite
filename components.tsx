@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 import type { ChatMessage } from './types';
-import { startChatSession, isGeminiAvailable } from './services/geminiService';
+import { startChatSession, isGeminiAvailable, setUserApiKey, clearUserApiKey, getApiKeyStatus } from './services/geminiService';
 import { Chat as GenAIChat } from '@google/genai';
 
 // --- ICONS ---
@@ -488,7 +488,16 @@ export const Chat: React.FC<ChatProps> = ({ initialPrompt, trigger }) => {
         return (
             <Card className="mt-8">
                 <h3 className="text-lg font-semibold mb-2">Forensic Insights Chat</h3>
-                <p className="text-sm text-amber-600">Gemini chat is unavailable. An API key is required for this feature.</p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p className="text-sm text-amber-800 mb-2">
+                        <strong>Demo Mode:</strong> AI-powered forensic analysis is unavailable.
+                    </p>
+                    <p className="text-xs text-amber-600">
+                        This chat would normally provide expert explanations of forensic discrepancies,
+                        answer follow-up questions, and offer strategic insights. Add your Gemini API key
+                        above to enable interactive AI analysis.
+                    </p>
+                </div>
             </Card>
         );
     }
@@ -537,5 +546,158 @@ export const Chat: React.FC<ChatProps> = ({ initialPrompt, trigger }) => {
                 </form>
             </div>
         </Card>
+    );
+};
+
+// --- API KEY BANNER COMPONENT ---
+
+interface ApiKeyBannerProps {
+    onKeySet?: () => void;
+}
+
+export const ApiKeyBanner: React.FC<ApiKeyBannerProps> = ({ onKeySet }) => {
+    const [showInput, setShowInput] = useState(false);
+    const [apiKey, setApiKey] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [keyStatus, setKeyStatus] = useState(getApiKeyStatus());
+
+    useEffect(() => {
+        setKeyStatus(getApiKeyStatus());
+    }, []);
+
+    const handleSetKey = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!apiKey.trim()) return;
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const success = setUserApiKey(apiKey);
+            if (success) {
+                setApiKey('');
+                setShowInput(false);
+                setKeyStatus(getApiKeyStatus());
+                onKeySet?.();
+            } else {
+                setError('Failed to set API key. Please try again.');
+            }
+        } catch (err) {
+            setError('Invalid API key format.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClearKey = () => {
+        clearUserApiKey();
+        setKeyStatus(getApiKeyStatus());
+        setShowInput(false);
+        setApiKey('');
+        setError('');
+    };
+
+    if (keyStatus.hasKey) {
+        return (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                        <div>
+                            <p className="text-sm font-medium text-green-800">
+                                AI Features Enabled
+                            </p>
+                            <p className="text-xs text-green-600">
+                                {keyStatus.isUserProvided ? 'Using your API key' : 'Using environment API key'}
+                            </p>
+                        </div>
+                    </div>
+                    {keyStatus.isUserProvided && (
+                        <Button
+                            onClick={handleClearKey}
+                            className="text-xs bg-green-100 text-green-700 hover:bg-green-200 border-green-300"
+                        >
+                            Clear Key
+                        </Button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+                <div className="w-2 h-2 bg-amber-500 rounded-full mr-3 mt-2"></div>
+                <div className="flex-grow">
+                    <h3 className="text-sm font-medium text-amber-800 mb-2">
+                        AI Features Unavailable
+                    </h3>
+                    <p className="text-xs text-amber-700 mb-3">
+                        This application uses Google's Gemini AI for forensic insights, strategy feedback, and intelligent analysis.
+                        To unlock these features, please provide your Gemini API key.
+                    </p>
+
+                    {!showInput ? (
+                        <div className="flex items-center space-x-3">
+                            <Button
+                                onClick={() => setShowInput(true)}
+                                className="text-xs bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-300"
+                            >
+                                Add API Key
+                            </Button>
+                            <a
+                                href="https://aistudio.google.com/app/apikey"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-amber-600 hover:text-amber-800 underline"
+                            >
+                                Get API Key →
+                            </a>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSetKey} className="space-y-3">
+                            <div>
+                                <input
+                                    type="password"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    placeholder="Enter your Gemini API key..."
+                                    className="w-full px-3 py-2 text-xs border border-amber-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                    disabled={isLoading}
+                                />
+                                {error && (
+                                    <p className="text-xs text-red-600 mt-1">{error}</p>
+                                )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading || !apiKey.trim()}
+                                    className="text-xs bg-amber-600 text-white hover:bg-amber-700"
+                                >
+                                    {isLoading ? 'Setting...' : 'Set Key'}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowInput(false);
+                                        setApiKey('');
+                                        setError('');
+                                    }}
+                                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                            <p className="text-xs text-amber-600">
+                                Your API key is stored locally in your browser and never sent to our servers.
+                            </p>
+                        </form>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };

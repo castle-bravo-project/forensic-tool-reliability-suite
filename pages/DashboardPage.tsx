@@ -40,7 +40,24 @@ const EmergingThreatsWidget = () => {
         });
     }, []);
 
-    if (!isGeminiAvailable()) return null;
+    if (!isGeminiAvailable()) {
+        return (
+            <WidgetCard className="p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Emerging Threats & Rulings</h3>
+                <div className="space-y-4">
+                    <div className="border-l-4 border-amber-400 pl-4">
+                        <h4 className="font-semibold text-slate-700 mb-2">Demo Mode</h4>
+                        <p className="text-sm text-slate-600 mb-2">
+                            This widget would normally display AI-powered insights about recent forensic threats, court rulings, and security advisories.
+                        </p>
+                        <p className="text-xs text-amber-600">
+                            Add your Gemini API key above to enable live threat intelligence.
+                        </p>
+                    </div>
+                </div>
+            </WidgetCard>
+        );
+    }
 
     return (
         <WidgetCard className="p-6">
@@ -88,7 +105,24 @@ const ConceptOfTheDayWidget = () => {
         });
     }, []);
 
-    if (!isGeminiAvailable()) return null;
+    if (!isGeminiAvailable()) {
+        return (
+            <WidgetCard className="p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-2">Concept of the Day</h3>
+                <p className="text-sm font-semibold text-brand-blue-700 mb-4">Demo: Hash Function Integrity</p>
+                <div className="space-y-3">
+                    <p className="text-sm text-slate-600">
+                        Hash functions are mathematical algorithms that convert input data into fixed-size strings.
+                        In digital forensics, they're crucial for verifying evidence integrity - any change to the
+                        original data results in a completely different hash value.
+                    </p>
+                    <p className="text-xs text-amber-600">
+                        Add your Gemini API key above to get daily AI-generated forensic concepts.
+                    </p>
+                </div>
+            </WidgetCard>
+        );
+    }
 
     return (
         <WidgetCard className="p-6">

@@ -36,6 +36,8 @@ Through a series of interactive modules, users can compare the outputs of an "au
 - **Daubert Motion Outline Generator:** Instantly generate a formatted `.docx` outline for a motion to exclude unreliable expert testimony.
 -**Intelligence Dashboard:** A landing page with AI-generated widgets for emerging threats, forensic concepts, and a tool-vetting checklist.
 - **Case Strategy Simulator:** Test your legal instincts in various scenarios and receive AI-driven feedback on your chosen strategy.
+- **Progressive Enhancement:** Works in demo mode without an API key, with full AI features unlocked when a key is provided.
+- **User-Friendly API Key Management:** Secure in-browser API key storage with easy setup.
 - **Responsive Design:** Fully functional on desktop and tablet devices.
 
 ## Technology Stack
@@ -58,21 +60,34 @@ Through a series of interactive modules, users can compare the outputs of an "au
 
 This application requires a Google Gemini API key to enable its AI-powered features (Intelligence Dashboard, Forensic Insights Chat, Strategy Simulator).
 
-**Crucially, the API key is managed exclusively through an environment variable.**
+#### For End Users (Hosted Version)
 
-1.  **Obtain a Key:** Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-2.  **Create an Environment File:** In the root directory of the project, create a file named `.env`.
-3.  **Set the Variable:** Add the following line to your `.env` file, replacing `YOUR_API_KEY_HERE` with your actual key:
+The application features **progressive enhancement** - it works without an API key but provides enhanced functionality when one is provided:
+
+1. **Demo Mode (No API Key):** The application displays static demo content and educational information
+2. **Full AI Mode (With API Key):** Unlocks live AI analysis, threat intelligence, and interactive chat features
+
+**To enable AI features:**
+1. Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Click "Add API Key" in the banner that appears at the top of the application
+3. Enter your key - it's stored securely in your browser's local storage
+4. Your key is never sent to our servers and remains private to your browser session
+
+#### For Developers (Local Development)
+
+You can provide an API key through environment variables for development:
+
+1. **Create an Environment File:** In the root directory, create a file named `.env`
+2. **Set the Variable:** Add the following line, replacing `YOUR_API_KEY_HERE` with your actual key:
     ```
-    API_KEY=YOUR_API_KEY_HERE
+    GEMINI_API_KEY=YOUR_API_KEY_HERE
     ```
 
-**IMPORTANT:**
-- **DO NOT** hardcode your API key anywhere in the source code.
-- **DO NOT** commit the `.env` file to version control. The `.gitignore` file should already be configured to prevent this.
-- The application code is designed to read the key from `process.env.API_KEY`. It will not prompt you for a key in the UI.
-
-If no API key is provided, the application will still run, but all AI-dependent features will be gracefully disabled.
+**Security Notes:**
+- User-provided API keys are stored only in browser localStorage
+- Environment variables are only used during build time
+- Keys are never transmitted to external servers (except directly to Google's Gemini API)
+- The `.gitignore` file prevents accidental commit of `.env` files
 
 ### Installation
 
