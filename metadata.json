@@ -1,0 +1,6 @@
+{
+  "name": "Forensic Tool Reliability Suite",
+  "description": "An educational web application demonstrating the critical importance of forensic tool authenticity and reliability through interactive, side-by-side comparisons of compromised and authentic tool outputs.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
